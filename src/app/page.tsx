@@ -1,3 +1,4 @@
+import BlogSection from "@/components/homepage/BlogSection";
 import FAQSection from "@/components/homepage/FAQSection";
 import HeroBanner from "@/components/homepage/HeroBanner";
 import HowItWorks from "@/components/homepage/HowItWorks";
@@ -10,6 +11,7 @@ export default function Home() {
       <HowItWorks/>
       <Testimonials/>
       <FAQSection/>
+      <BlogSection/>
     </>
   );
 }
