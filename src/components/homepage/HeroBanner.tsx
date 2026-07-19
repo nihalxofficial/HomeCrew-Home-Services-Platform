@@ -150,14 +150,14 @@ const HeroBanner = ({
               </div>
             </div>
 
-            {/* Right Content - Solid Design */}
+            {/* Right Content - Clean Solid Design */}
             <div
               className={`lg:col-span-5 transform transition-all duration-1000 delay-300 ${
                 isVisible ? "translate-x-0 opacity-100" : "translate-x-20 opacity-0"
               }`}
             >
-              {/* Main Card - Solid Dark Background */}
-              <div className="bg-gradient-to-br from-gray-900/95 to-gray-800/95 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+              {/* Main Card - Clean White/Solid Background */}
+              <div className="bg-white/95 rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
                 {/* Card Header */}
                 <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
                   <h3 className="text-white font-bold text-lg flex items-center gap-2">
@@ -174,9 +174,9 @@ const HeroBanner = ({
                     <input
                       type="text"
                       placeholder="What service do you need?"
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-11 text-white placeholder-white/50 focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 pl-11 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all"
                     />
-                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
 
                   {/* Popular Services Grid */}
@@ -185,9 +185,9 @@ const HeroBanner = ({
                       <Link
                         key={service}
                         href={`/services/${service.toLowerCase().replace(/\s+/g, "-")}`}
-                        className="text-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg py-2.5 px-2 transition-all duration-300 group"
+                        className="text-center bg-gray-50 hover:bg-green-50 border border-gray-200 hover:border-green-200 rounded-lg py-2.5 px-2 transition-all duration-300 group"
                       >
-                        <p className="text-white/80 text-xs font-medium group-hover:text-white transition-colors">
+                        <p className="text-gray-600 text-xs font-medium group-hover:text-green-600 transition-colors">
                           {service}
                         </p>
                       </Link>
@@ -197,10 +197,10 @@ const HeroBanner = ({
                   {/* Divider */}
                   <div className="relative mb-6">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/10"></div>
+                      <div className="w-full border-t border-gray-200"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-gray-900/95 px-4 text-white/50">Why HomeCrew?</span>
+                      <span className="bg-white px-4 text-gray-500">Why HomeCrew?</span>
                     </div>
                   </div>
 
@@ -209,12 +209,14 @@ const HeroBanner = ({
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className="flex items-start gap-2.5 bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-all duration-300 group"
+                        className="flex items-start gap-2.5 bg-gray-50 rounded-lg p-3 hover:bg-green-50 transition-all duration-300 group border border-transparent hover:border-green-200"
                       >
-                        <span className="text-green-400 text-sm mt-0.5">{feature.icon}</span>
+                        <span className="text-green-500 text-sm mt-0.5">{feature.icon}</span>
                         <div>
-                          <p className="text-white/90 text-xs font-medium">{feature.title}</p>
-                          <p className="text-white/40 text-[10px] leading-tight">{feature.desc}</p>
+                          <p className="text-gray-700 text-xs font-medium group-hover:text-green-600 transition-colors">
+                            {feature.title}
+                          </p>
+                          <p className="text-gray-400 text-[10px] leading-tight">{feature.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -223,7 +225,7 @@ const HeroBanner = ({
                   {/* CTA Link */}
                   <Link
                     href="/explore"
-                    className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/20 hover:shadow-green-500/40"
+                    className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-green-500/50"
                   >
                     <span>Explore All Services</span>
                     <FaArrowRight className="text-sm" />
