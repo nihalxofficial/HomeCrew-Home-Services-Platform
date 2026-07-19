@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  FaLeaf,
+  FaHome,
   FaSignInAlt,
   FaUserPlus,
   FaBars,
@@ -29,8 +29,8 @@ const Navbar = () => {
     { name: "All-Services", href: "/services" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
-    { name: "My-Services", href: "/contact" },
-    { name: "Add-Service", href: "/contact" },
+    { name: "My-Services", href: "/my-services" },
+    { name: "Add-Service", href: "/add-service" },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -47,7 +47,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <FaLeaf className="text-2xl text-green-600 group-hover:text-green-700 transition-colors" />
+            <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white text-sm shadow-md shadow-green-500/30 group-hover:scale-110 transition-transform duration-300">
+              <FaHome />
+            </div>
             <span className="font-bold text-xl text-gray-800">
               Home<span className="text-green-600">Crew</span>
             </span>
