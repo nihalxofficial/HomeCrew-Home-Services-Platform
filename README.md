@@ -24,6 +24,8 @@ bun dev
 - JWT
 - React Icons
 - React Toast
+- Mongodb 
+- BetterAuth
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
