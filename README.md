@@ -25,7 +25,6 @@
   - [Deployments](#deployments)
 - [Key Features](#-key-features)
 - [Tech Stack / npm Packages](#-npm-packages-used)
-- [Project Structure](#-project-structure)
 - [Environment Variables](#-environment-variables)
 - [Getting Started](#-getting-started)
 - [License](#-license)
