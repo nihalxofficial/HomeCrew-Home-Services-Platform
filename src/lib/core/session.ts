@@ -1,31 +1,35 @@
-"use server"
+"use server";
+
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "../auth";
+
+type Role = "admin" | "user";
 
 export const getUserSession = async () => {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  return session?.user;
+  return session?.user ?? null;
 };
 
-
-export const getToken = async()=>{
+export const getToken = async (): Promise<string | null> => {
   const token = await auth.api.getToken({
     headers: await headers(),
   });
-  return token ? token.token : {}
-}
+  return token?.token ?? null;
+};
 
-
-export const getRequiredRole = async(role : string)=> {
+export const getRequiredRole = async (role: Role) => {
   const user = await getUserSession();
-  if(!user){
+
+  if (!user) {
     redirect("/login");
   }
-  const currentRole = user?.role;
-  if(currentRole!==role){
+
+  if (user.role !== role) {
     redirect("/forbidden");
   }
-}
+
+  return user;
+};
