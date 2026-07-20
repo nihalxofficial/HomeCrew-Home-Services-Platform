@@ -16,6 +16,7 @@ import {
   FaHome,
   FaExclamationCircle,
 } from "react-icons/fa";
+import { authClient } from "@/lib/auth-client";
 
 interface FormData {
   email: string;
@@ -88,37 +89,37 @@ export default function LoginClient() {
 
     try {
       const formValues = Object.fromEntries(
-        new FormData(e.currentTarget).entries()
+        new FormData(e.currentTarget).entries(),
       );
-      console.log(formValues);
 
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formValues.email,
-          password: formValues.password,
-          rememberMe: formValues.rememberMe === "on",
-        }),
+      const { data, error } = await authClient.signIn.email({
+        email: formValues.email as string,
+        password: formValues.password as string,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      toast.success("Login successful! Welcome back! 🎉");
-      
-      setTimeout(() => {
+      if (data) {
+        toast.success("Login successful! Welcome back!");
+        setTimeout(() => {
         router.push("/");
       }, 1000);
+      }
+
+      if (error) {
+        toast.error(error.message);
+      }
+
+      
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "An error occurred. Please try again later.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An error occurred. Please try again later.",
+      );
       setErrors({
-        general: error instanceof Error ? error.message : "An error occurred. Please try again later.",
+        general:
+          error instanceof Error
+            ? error.message
+            : "An error occurred. Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -148,23 +149,23 @@ export default function LoginClient() {
   };
 
   const socialButtons = [
-    { 
-      icon: <FaGoogle />, 
-      label: "Google", 
+    {
+      icon: <FaGoogle />,
+      label: "Google",
       onClick: handleGoogleLogin,
-      color: "hover:bg-red-50 hover:border-red-200 hover:text-red-600" 
+      color: "hover:bg-red-50 hover:border-red-200 hover:text-red-600",
     },
-    { 
-      icon: <FaFacebook />, 
-      label: "Facebook", 
+    {
+      icon: <FaFacebook />,
+      label: "Facebook",
       onClick: handleFacebookLogin,
-      color: "hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600" 
+      color: "hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600",
     },
-    { 
-      icon: <FaApple />, 
-      label: "Apple", 
+    {
+      icon: <FaApple />,
+      label: "Apple",
       onClick: handleAppleLogin,
-      color: "hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900" 
+      color: "hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900",
     },
   ];
 
@@ -175,7 +176,7 @@ export default function LoginClient() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-green-400/5 rounded-full blur-3xl" />
-        
+
         <div className="absolute top-20 right-20 w-12 h-12 bg-green-500/20 rounded-full blur-2xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-16 h-16 bg-emerald-500/20 rounded-full blur-2xl animate-pulse delay-700" />
         <div className="absolute top-1/2 right-1/4 w-10 h-10 bg-green-400/20 rounded-full blur-2xl animate-pulse delay-1000" />
@@ -208,7 +209,10 @@ export default function LoginClient() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
               Email Address
             </label>
             <div className="relative">
@@ -220,12 +224,16 @@ export default function LoginClient() {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 className={`w-full px-3 py-2.5 pl-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                  errors.email ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                  errors.email
+                    ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                    : "border-gray-200"
                 }`}
               />
-              <FaEnvelope className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                errors.email ? "text-red-400" : "text-gray-400"
-              }`} />
+              <FaEnvelope
+                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                  errors.email ? "text-red-400" : "text-gray-400"
+                }`}
+              />
             </div>
             {errors.email && (
               <p className="mt-1 text-xs text-red-600">{errors.email}</p>
@@ -235,7 +243,10 @@ export default function LoginClient() {
           {/* Password Field */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <Link
@@ -254,19 +265,27 @@ export default function LoginClient() {
                 onChange={handleChange}
                 placeholder="••••••••"
                 className={`w-full px-3 py-2.5 pl-10 pr-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                  errors.password ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                  errors.password
+                    ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                    : "border-gray-200"
                 }`}
               />
-              <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                errors.password ? "text-red-400" : "text-gray-400"
-              }`} />
+              <FaLock
+                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                  errors.password ? "text-red-400" : "text-gray-400"
+                }`}
+              />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
+                {showPassword ? (
+                  <FaEyeSlash className="text-sm" />
+                ) : (
+                  <FaEye className="text-sm" />
+                )}
               </button>
             </div>
             {errors.password && (
@@ -292,7 +311,7 @@ export default function LoginClient() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full py-2.5 cursor-pointer bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-green-500/50 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -314,7 +333,9 @@ export default function LoginClient() {
             <div className="w-full border-t border-gray-200"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-4 text-gray-500">Or continue with</span>
+            <span className="bg-white px-4 text-gray-500">
+              Or continue with
+            </span>
           </div>
         </div>
 
@@ -342,7 +363,10 @@ export default function LoginClient() {
         {/* Register Link */}
         <p className="text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link href="/register" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
+          <Link
+            href="/register"
+            className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+          >
             Sign up
           </Link>
         </p>

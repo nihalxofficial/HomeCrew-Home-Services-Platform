@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import Image from "next/image";
 import {
   FaEnvelope,
   FaLock,
@@ -20,6 +19,7 @@ import {
   FaImage,
   FaTimes,
 } from "react-icons/fa";
+import { authClient } from "@/lib/auth-client";
 
 interface FormData {
   name: string;
@@ -125,7 +125,7 @@ export default function RegisterClient() {
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
-    
+
     if (name === "imageUrl" && value) {
       setImagePreview(value);
     } else if (name === "imageUrl" && !value) {
@@ -145,39 +145,36 @@ export default function RegisterClient() {
 
     try {
       const formValues = Object.fromEntries(
-        new FormData(e.currentTarget).entries()
+        new FormData(e.currentTarget).entries(),
       );
-    //   console.log(formValues);
 
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formValues.name,
-          email: formValues.email,
-          password: formValues.password,
-          imageUrl: formValues.imageUrl || "",
-          agreeTerms: formValues.agreeTerms === "on",
-        }),
+      const { data, error } = await authClient.signUp.email({
+        name: formValues.name as string,
+        email: formValues.email as string,
+        password: formValues.password as string,
+        image: formValues.imageUrl as string,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+      if (error) {
+        toast.error(error.message);
       }
-
-      toast.success("Account created successfully! 🎉 Please login to continue.");
-      
-      setTimeout(() => {
-        router.push("/login");
-      }, 1500);
+      if (data) {
+        toast.success("Account created successfully! 🎉");
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
+      }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "An error occurred. Please try again later.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "An error occurred. Please try again later.",
+      );
       setErrors({
-        general: error instanceof Error ? error.message : "An error occurred. Please try again later.",
+        general:
+          error instanceof Error
+            ? error.message
+            : "An error occurred. Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -209,23 +206,23 @@ export default function RegisterClient() {
   };
 
   const socialButtons = [
-    { 
-      icon: <FaGoogle />, 
-      label: "Google", 
+    {
+      icon: <FaGoogle />,
+      label: "Google",
       onClick: handleGoogleRegister,
-      color: "hover:bg-red-50 hover:border-red-200 hover:text-red-600" 
+      color: "hover:bg-red-50 hover:border-red-200 hover:text-red-600",
     },
-    { 
-      icon: <FaFacebook />, 
-      label: "Facebook", 
+    {
+      icon: <FaFacebook />,
+      label: "Facebook",
       onClick: handleFacebookRegister,
-      color: "hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600" 
+      color: "hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600",
     },
-    { 
-      icon: <FaApple />, 
-      label: "Apple", 
+    {
+      icon: <FaApple />,
+      label: "Apple",
       onClick: handleAppleRegister,
-      color: "hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900" 
+      color: "hover:bg-gray-50 hover:border-gray-300 hover:text-gray-900",
     },
   ];
 
@@ -236,7 +233,7 @@ export default function RegisterClient() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-green-400/5 rounded-full blur-3xl" />
-        
+
         <div className="absolute top-20 right-20 w-12 h-12 bg-green-500/20 rounded-full blur-2xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-16 h-16 bg-emerald-500/20 rounded-full blur-2xl animate-pulse delay-700" />
         <div className="absolute top-1/2 right-1/4 w-10 h-10 bg-green-400/20 rounded-full blur-2xl animate-pulse delay-1000" />
@@ -270,7 +267,10 @@ export default function RegisterClient() {
           {/* Row 1: Name & Email */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Full Name
               </label>
               <div className="relative">
@@ -282,12 +282,16 @@ export default function RegisterClient() {
                   onChange={handleChange}
                   placeholder="John Doe"
                   className={`w-full px-3 py-2.5 pl-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                    errors.name ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                    errors.name
+                      ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 />
-                <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                  errors.name ? "text-red-400" : "text-gray-400"
-                }`} />
+                <FaUser
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                    errors.name ? "text-red-400" : "text-gray-400"
+                  }`}
+                />
               </div>
               {errors.name && (
                 <p className="mt-1 text-xs text-red-600">{errors.name}</p>
@@ -295,7 +299,10 @@ export default function RegisterClient() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -307,12 +314,16 @@ export default function RegisterClient() {
                   onChange={handleChange}
                   placeholder="you@example.com"
                   className={`w-full px-3 py-2.5 pl-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                    errors.email ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                    errors.email
+                      ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 />
-                <FaEnvelope className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                  errors.email ? "text-red-400" : "text-gray-400"
-                }`} />
+                <FaEnvelope
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                    errors.email ? "text-red-400" : "text-gray-400"
+                  }`}
+                />
               </div>
               {errors.email && (
                 <p className="mt-1 text-xs text-red-600">{errors.email}</p>
@@ -322,8 +333,12 @@ export default function RegisterClient() {
 
           {/* Row 2: Image URL (Full Row) */}
           <div>
-            <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1.5">
-              Profile Image URL <span className="text-gray-400 text-xs">(optional)</span>
+            <label
+              htmlFor="imageUrl"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Profile Image URL{" "}
+              <span className="text-gray-400 text-xs">(optional)</span>
             </label>
             <div className="relative">
               <input
@@ -334,12 +349,16 @@ export default function RegisterClient() {
                 onChange={handleChange}
                 placeholder="https://example.com/avatar.jpg"
                 className={`w-full px-3 py-2.5 pl-10 pr-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                  errors.imageUrl ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                  errors.imageUrl
+                    ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                    : "border-gray-200"
                 }`}
               />
-              <FaImage className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                errors.imageUrl ? "text-red-400" : "text-gray-400"
-              }`} />
+              <FaImage
+                className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                  errors.imageUrl ? "text-red-400" : "text-gray-400"
+                }`}
+              />
               {formData.imageUrl && (
                 <button
                   type="button"
@@ -354,7 +373,7 @@ export default function RegisterClient() {
             {errors.imageUrl && (
               <p className="mt-1 text-xs text-red-600">{errors.imageUrl}</p>
             )}
-            
+
             {/* Image Preview */}
             {/* {imagePreview && (
               <div className="mt-3 flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
@@ -389,7 +408,10 @@ export default function RegisterClient() {
           {/* Row 3: Password & Confirm Password */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Password
               </label>
               <div className="relative">
@@ -401,19 +423,27 @@ export default function RegisterClient() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   className={`w-full px-3 py-2.5 pl-10 pr-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                    errors.password ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                    errors.password
+                      ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 />
-                <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                  errors.password ? "text-red-400" : "text-gray-400"
-                }`} />
+                <FaLock
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                    errors.password ? "text-red-400" : "text-gray-400"
+                  }`}
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
+                  {showPassword ? (
+                    <FaEyeSlash className="text-sm" />
+                  ) : (
+                    <FaEye className="text-sm" />
+                  )}
                 </button>
               </div>
               {errors.password && (
@@ -425,7 +455,10 @@ export default function RegisterClient() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -437,23 +470,35 @@ export default function RegisterClient() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   className={`w-full px-3 py-2.5 pl-10 pr-10 bg-gray-50 border rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500 transition-all ${
-                    errors.confirmPassword ? "border-red-300 focus:ring-red-500/50 focus:border-red-500" : "border-gray-200"
+                    errors.confirmPassword
+                      ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 />
-                <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
-                  errors.confirmPassword ? "text-red-400" : "text-gray-400"
-                }`} />
+                <FaLock
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${
+                    errors.confirmPassword ? "text-red-400" : "text-gray-400"
+                  }`}
+                />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showConfirmPassword ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
+                  {showConfirmPassword ? (
+                    <FaEyeSlash className="text-sm" />
+                  ) : (
+                    <FaEye className="text-sm" />
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-600">{errors.confirmPassword}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
           </div>
@@ -468,13 +513,22 @@ export default function RegisterClient() {
               onChange={handleChange}
               className="w-4 h-4 mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-offset-0 cursor-pointer"
             />
-            <label htmlFor="agreeTerms" className="text-sm text-gray-600 cursor-pointer">
+            <label
+              htmlFor="agreeTerms"
+              className="text-sm text-gray-600 cursor-pointer"
+            >
               I agree to the{" "}
-              <Link href="/terms" className="text-green-600 hover:text-green-700 font-medium transition-colors">
+              <Link
+                href="/terms"
+                className="text-green-600 hover:text-green-700 font-medium transition-colors"
+              >
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-green-600 hover:text-green-700 font-medium transition-colors">
+              <Link
+                href="/privacy"
+                className="text-green-600 hover:text-green-700 font-medium transition-colors"
+              >
                 Privacy Policy
               </Link>
             </label>
@@ -509,7 +563,9 @@ export default function RegisterClient() {
             <div className="w-full border-t border-gray-200"></div>
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-4 text-gray-500">Or continue with</span>
+            <span className="bg-white px-4 text-gray-500">
+              Or continue with
+            </span>
           </div>
         </div>
 
@@ -537,7 +593,10 @@ export default function RegisterClient() {
         {/* Login Link */}
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link href="/login" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
+          <Link
+            href="/login"
+            className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+          >
             Sign in
           </Link>
         </p>
