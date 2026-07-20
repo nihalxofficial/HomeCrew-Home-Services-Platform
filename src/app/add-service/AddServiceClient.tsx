@@ -18,6 +18,9 @@ import {
   FaBug, FaUserGraduate, FaScrewdriver, FaBolt, FaTv, FaSeedling,
   FaSpinner, FaInfoCircle, FaList, FaEye,
 } from "react-icons/fa";
+import { User } from "@/types";
+import { addService } from "@/lib/action/services";
+import { toast } from "react-toastify";
 
 /* ──────────────────────────── Constants ──────────────────────────── */
 
@@ -60,8 +63,11 @@ function Chip({ label, color, onRemove }: { label: string; color: "green" | "blu
 }
 
 /* ──────────────────────────── Main Component ──────────────────────────── */
+export interface CreatorProps{
+  creator: User,
+}
 
-export default function AddServicePage() {
+export default function AddServicePage({creator} : CreatorProps) {
   const router = useRouter();
   const [step, setStep]           = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,13 +114,19 @@ export default function AddServicePage() {
       tags,
       availableCities: cities,
       price: Number(stepData.price),
-      createdAt: new Date().toISOString(),
+      creatorId: creator?.id,
     };
     setIsSubmitting(true);
     await new Promise((r) => setTimeout(r, 1500));
-    console.log("Service Created:", finalData);
+    // console.log("Service Created:", finalData);
+    const result = await addService(finalData);
+    if(result.title){
+      setIsSuccess(true);
+    }
+    if(result.success===false){
+      toast.error("Service couldn't added!")
+    }
     setIsSubmitting(false);
-    setIsSuccess(true);
     setTimeout(() => router.push("/"), 2500);
   };
 

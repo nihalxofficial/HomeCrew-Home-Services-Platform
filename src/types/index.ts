@@ -1,5 +1,4 @@
 export interface Service {
-  _id: string;
   title: string;
   category: string;
   shortDescription: string;
@@ -10,10 +9,18 @@ export interface Service {
   imageUrl: string;
   whatsIncluded: string[];
   tags: string[];
-  avgRating: number;
-  totalReviews: number;
-  totalBookings: number;
   isFeatured: boolean;
   availableCities: string[];
-  createdAt: string;
+  creatorId: string;
+}
+
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  role: string;
+  plan: string;
+  status: string;
 }

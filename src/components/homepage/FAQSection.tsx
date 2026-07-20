@@ -41,7 +41,7 @@ const FAQSection = () => {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (sectionRef.current) {
@@ -164,7 +164,9 @@ const FAQSection = () => {
           <div className="lg:col-span-3">
             <div
               className={`bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transform transition-all duration-1000 ${
-                isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+                isVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-12 opacity-0"
               }`}
               style={{ transitionDelay: "200ms" }}
             >
@@ -181,7 +183,6 @@ const FAQSection = () => {
               <div className="p-4">
                 <Accordion
                   className="w-full space-y-2"
-                  selectionMode="single"
                   defaultExpandedKeys={["0"]}
                 >
                   {faqItems.map((item, index) => (
@@ -226,7 +227,9 @@ const FAQSection = () => {
           <div className="lg:col-span-2">
             <div
               className={`space-y-4 transform transition-all duration-1000 ${
-                isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+                isVisible
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-12 opacity-0"
               }`}
               style={{ transitionDelay: "400ms" }}
             >
@@ -283,7 +286,9 @@ const FAQSection = () => {
                   <p className="text-xs text-gray-500">Support Available</p>
                 </div>
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 text-center">
-                  <div className="text-2xl font-bold text-green-600">&lt; 2h</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    &lt; 2h
+                  </div>
                   <p className="text-xs text-gray-500">Avg Response Time</p>
                 </div>
               </div>
