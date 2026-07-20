@@ -100,15 +100,13 @@ export default function LoginClient() {
       if (data) {
         toast.success("Login successful! Welcome back!");
         setTimeout(() => {
-        router.push("/");
-      }, 1000);
+          router.push("/");
+        }, 1000);
       }
 
       if (error) {
         toast.error(error.message);
       }
-
-      
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -127,11 +125,10 @@ export default function LoginClient() {
   };
 
   // Social Login Functions
-  const handleGoogleLogin = () => {
-    setIsSocialLoading("google");
-    // Add your Google login logic here
-    toast.info("Google login coming soon!");
-    setIsSocialLoading(null);
+  const handleGoogleLogin = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+    });
   };
 
   const handleFacebookLogin = () => {

@@ -187,10 +187,10 @@ export default function RegisterClient() {
   };
 
   // Social Login Functions
-  const handleGoogleRegister = () => {
-    setIsSocialLoading("google");
-    toast.info("Google registration coming soon!");
-    setIsSocialLoading(null);
+  const handleGoogleRegister = async() => {
+    await authClient.signIn.social({
+      provider: "google",
+    });
   };
 
   const handleFacebookRegister = () => {
