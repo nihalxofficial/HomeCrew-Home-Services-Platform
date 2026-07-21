@@ -7,6 +7,7 @@ import { FaArrowLeft, FaRedo, FaSpinner } from "react-icons/fa";
 import { SearchField, Select, ListBox, Pagination, Label } from "@heroui/react";
 import { Service } from "@/types";
 import { ServiceCard } from "@/components/shared/ServiceCard";
+import { ServiceCardSkeleton } from "@/components/shared/ServiceCardSkeleton";
 import { getAllServices } from "@/lib/api/services";
 
 interface ServicesClientProps {
@@ -428,7 +429,13 @@ const ServicesClient = ({
         </div>
 
         {/* Services Grid - Balanced equal height cards */}
-        {services.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <ServiceCardSkeleton key={`skeleton-${index}`} />
+            ))}
+          </div>
+        ) : services.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
             {services.map((service, index) => (
               <div key={service._id || service.id || index} className="h-full">

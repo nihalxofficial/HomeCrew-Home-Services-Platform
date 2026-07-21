@@ -9,10 +9,12 @@ import {
 import { Service } from "@/types";
 import { ServiceCardSkeleton } from "../shared/ServiceCardSkeleton";
 import { ServiceCard } from "../shared/ServiceCard";
+import { getAllServices } from "@/lib/api/services";
 
 const FeaturedServices = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>([]);
   const [likedCards, setLikedCards] = useState<Set<string>>(new Set());
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -37,12 +39,27 @@ const FeaturedServices = () => {
     };
   }, []);
 
-  // Simulate loading
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const fetchServices = async () => {
+      try {
+        setIsLoading(true);
+        const res = await getAllServices({ limit: 6 });
+        if (res?.data && Array.isArray(res.data)) {
+          setServices(res.data.slice(0, 6));
+        } else if (Array.isArray(res)) {
+          setServices(res.slice(0, 6));
+        } else {
+          setServices([]);
+        }
+      } catch (error) {
+        console.error("Error fetching featured services:", error);
+        setServices([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchServices();
   }, []);
 
   const handleLike = (id: string) => {
@@ -56,165 +73,6 @@ const FeaturedServices = () => {
       return newSet;
     });
   };
-
-  const featuredServices: Service[] = [
-    {
-      _id: "1",
-      title: "Premium Home Deep Cleaning",
-      category: "Cleaning",
-      shortDescription: "Complete home cleaning with eco-friendly products",
-      fullDescription:
-        "Our premium deep cleaning service covers every corner of your home with eco-friendly, non-toxic products safe for kids and pets.",
-      price: 129,
-      priceUnit: "fixed",
-      duration: "3-4 hours",
-      imageUrl:
-        "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&h=600&fit=crop",
-      whatsIncluded: [
-        "All rooms deep cleaned",
-        "Kitchen & bathroom sanitized",
-        "Floor mopping & vacuuming",
-        "Window & mirror cleaning",
-      ],
-      tags: ["Deep Clean", "Eco-Friendly", "Pet Safe"],
-      avgRating: 4.9,
-      totalReviews: 234,
-      totalBookings: 567,
-      isFeatured: true,
-      availableCities: ["New York", "Los Angeles", "Chicago"],
-      createdAt: "2024-12-01T00:00:00Z",
-    },
-    {
-      _id: "2",
-      title: "AC Repair & Maintenance",
-      category: "Repair",
-      shortDescription: "Expert AC repair with certified technicians",
-      fullDescription:
-        "Keep your AC running efficiently with our expert repair and maintenance services. Certified technicians diagnose issues quickly.",
-      price: 79,
-      priceUnit: "hourly",
-      duration: "1-2 hours",
-      imageUrl:
-        "https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?w=800&h=600&fit=crop",
-      whatsIncluded: [
-        "Complete system diagnosis",
-        "Filter replacement",
-        "Coil cleaning",
-        "Performance optimization",
-      ],
-      tags: ["AC Repair", "Maintenance", "Emergency"],
-      avgRating: 4.8,
-      totalReviews: 189,
-      totalBookings: 423,
-      isFeatured: true,
-      availableCities: ["New York", "Los Angeles", "Chicago"],
-      createdAt: "2024-12-02T00:00:00Z",
-    },
-    {
-      _id: "3",
-      title: "Interior Wall Painting",
-      category: "Home Improvement",
-      shortDescription: "Professional painting with premium paints",
-      fullDescription:
-        "Transform your home with our professional interior painting service using premium, low-VOC paints for flawless finishes.",
-      price: 199,
-      priceUnit: "fixed",
-      duration: "2-3 days",
-      imageUrl:
-        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&h=600&fit=crop",
-      whatsIncluded: [
-        "Wall preparation & priming",
-        "Premium paint application",
-        "Trim & ceiling painting",
-        "Full cleanup",
-      ],
-      tags: ["Painting", "Home Improvement", "Premium"],
-      avgRating: 4.9,
-      totalReviews: 156,
-      totalBookings: 312,
-      isFeatured: true,
-      availableCities: ["New York", "Los Angeles", "Chicago"],
-      createdAt: "2024-12-03T00:00:00Z",
-    },
-    {
-      _id: "4",
-      title: "Comprehensive Pest Control",
-      category: "Pest Control",
-      shortDescription: "Safe and effective pest elimination",
-      fullDescription:
-        "Protect your home with eco-friendly, pet-safe pest control methods that eliminate pests and prevent future infestations.",
-      price: 99,
-      priceUnit: "fixed",
-      duration: "2-3 hours",
-      imageUrl:
-        "https://images.unsplash.com/photo-1583947585927-4b1b6e1acbe0?w=800&h=600&fit=crop",
-      whatsIncluded: [
-        "Full property inspection",
-        "Custom treatment plan",
-        "Eco-friendly pesticides",
-        "3-month guarantee",
-      ],
-      tags: ["Pest Control", "Eco-Friendly", "Safe"],
-      avgRating: 4.7,
-      totalReviews: 143,
-      totalBookings: 289,
-      isFeatured: true,
-      availableCities: ["New York", "Los Angeles", "Chicago"],
-      createdAt: "2024-12-04T00:00:00Z",
-    },
-    {
-      _id: "5",
-      title: "Furniture Assembly Service",
-      category: "Installation",
-      shortDescription: "Fast and reliable furniture assembly",
-      fullDescription:
-        "Expert furniture assembly for all types from IKEA to custom pieces. Quick, professional, and hassle-free.",
-      price: 89,
-      priceUnit: "fixed",
-      duration: "1-3 hours",
-      imageUrl:
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
-      whatsIncluded: [
-        "Furniture assembly",
-        "Hardware installation",
-        "Leveling & alignment",
-        "Cleanup & packaging removal",
-      ],
-      tags: ["Assembly", "Furniture", "IKEA"],
-      avgRating: 4.7,
-      totalReviews: 98,
-      totalBookings: 210,
-      isFeatured: true,
-      availableCities: ["New York", "Los Angeles", "Chicago"],
-      createdAt: "2024-12-05T00:00:00Z",
-    },
-    {
-      _id: "6",
-      title: "Math Tutoring Services",
-      category: "Tutoring",
-      shortDescription: "Personalized math tutoring for all levels",
-      fullDescription:
-        "Expert math tutoring with personalized attention and proven results. Progress tracking and test preparation included.",
-      price: 45,
-      priceUnit: "hourly",
-      duration: "1 hour",
-      imageUrl:
-        "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=600&fit=crop",
-      whatsIncluded: [
-        "Personalized lesson plans",
-        "Homework assistance",
-        "Test preparation",
-        "Progress tracking",
-      ],
-      tags: ["Tutoring", "Math", "Education"],
-      avgRating: 4.8,
-      totalReviews: 112,
-      totalBookings: 178,
-      isFeatured: true,
-      availableCities: ["New York", "Los Angeles", "Chicago"],
-      createdAt: "2024-12-06T00:00:00Z",
-    },
-  ];
 
   return (
     <section
@@ -252,8 +110,8 @@ const FeaturedServices = () => {
               Array.from({ length: 6 }).map((_, index) => (
                 <ServiceCardSkeleton key={`skeleton-${index}`} />
               ))
-            : // Actual Cards
-              featuredServices.map((service, index) => (
+            : // Actual Cards from API
+              services.map((service, index) => (
                 <ServiceCard
                   key={service._id || service.id || index}
                   service={service}

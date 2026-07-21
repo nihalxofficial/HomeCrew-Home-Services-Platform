@@ -42,23 +42,12 @@ const LoadingClient = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-tr from-emerald-50 via-white to-emerald-100/70 selection:bg-emerald-200">
-      
-      {/* Immersive Greenish Ambient Backdrop */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-20 -right-20 w-[600px] h-[600px] bg-emerald-400/20 rounded-full blur-[140px] animate-pulse duration-[6000ms]" />
-        <div className="absolute -bottom-20 -left-20 w-[600px] h-[600px] bg-green-400/20 rounded-full blur-[140px] animate-pulse duration-[8000ms] delay-1000" />
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-emerald-300/15 rounded-full blur-[120px]" />
-        
-        {/* Subtle green-tinted organic technology pattern */}
-        <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#059669_1px,transparent_1px),linear-gradient(to_bottom,#059669_1px,transparent_1px)] bg-[size:40px_40px]" />
-      </div>
-
-      {/* Seamless Content Wrapper (No Card Boundaries) */}
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white selection:bg-emerald-200">
+      {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col items-center max-w-sm w-full px-6 text-center">
         
         {/* Emerald Brand Identity */}
-        <div className="flex items-center gap-3 mb-12">
+        <div className="flex items-center gap-3 mb-10">
           <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-600 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/30 animate-bounce">
             <FaHome className="text-white text-2xl" />
           </div>
@@ -87,7 +76,7 @@ const LoadingClient = () => {
         </div>
 
         {/* Clean Line Progress Bar */}
-        <div className="w-full max-w-[260px] bg-emerald-950/5 rounded-full h-1.5 overflow-hidden p-[0.5px] mb-2">
+        <div className="w-full max-w-[260px] bg-slate-100 rounded-full h-1.5 overflow-hidden p-[0.5px] mb-2">
           <div
             className="h-full bg-gradient-to-r from-green-500 via-emerald-500 to-emerald-600 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
@@ -95,17 +84,9 @@ const LoadingClient = () => {
         </div>
 
         {/* Numeric Counter */}
-        <span className="text-xs text-emerald-700/80 font-mono tracking-widest font-extrabold mb-12">
+        <span className="text-xs text-emerald-700/80 font-mono tracking-widest font-extrabold">
           {Math.round(progress)}%
         </span>
-
-        {/* Minimal Float Ticker (Blends seamlessly into page) */}
-        <div className="max-w-[280px]">
-          <p className="text-[11px] leading-relaxed text-slate-600 font-medium">
-            ✨ <span className="font-bold text-emerald-700">Crew Tip:</span> Use our built-in AI advisor to automatically diagnose appliance problems and match with listings.
-          </p>
-        </div>
-        
       </div>
     </div>
   );
