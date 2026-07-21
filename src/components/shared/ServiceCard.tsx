@@ -82,20 +82,22 @@ export const ServiceCard = ({
 }: ServiceCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isShared, setIsShared] = useState(false);
+  const serviceId = service._id || service.id || String(index);
 
   const handleLike = () => {
     if (onLike) {
-      onLike(service._id);
+      onLike(serviceId);
     }
   };
 
   const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/services/${serviceId}`;
     if (navigator.share) {
       try {
         await navigator.share({
           title: service.title,
           text: service.shortDescription,
-          url: `${window.location.origin}/services/${service._id}`,
+          url: shareUrl,
         });
         setIsShared(true);
         setTimeout(() => setIsShared(false), 2000);
@@ -104,8 +106,7 @@ export const ServiceCard = ({
       }
     } else {
       // Fallback: copy to clipboard
-      const url = `${window.location.origin}/services/${service._id}`;
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       setIsShared(true);
       setTimeout(() => setIsShared(false), 2000);
     }
@@ -113,22 +114,22 @@ export const ServiceCard = ({
 
   return (
     <div
-      className={`group relative transform transition-all duration-700 ${
+      className={`group relative transform transition-all duration-700 h-full flex flex-col ${
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
       }`}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      style={{ transitionDelay: `${index * 50}ms` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Card Container with 3D Effect */}
+      {/* Card Container with equal height */}
       <div
-        className={`relative bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-500 ${
-          isHovered ? "shadow-2xl -translate-y-3 rotate-[0.5deg]" : "shadow-lg"
+        className={`relative bg-white rounded-3xl shadow-lg overflow-hidden transition-all duration-500 flex flex-col h-full border border-gray-100/80 ${
+          isHovered ? "shadow-2xl -translate-y-2" : "shadow-md hover:shadow-xl"
         }`}
       >
         {/* Gradient Border Accent */}
         <div
-          className={`absolute top-0 left-0 right-0 bg-gradient-to-r ${getCategoryColor(
+          className={`absolute top-0 left-0 right-0 z-10 bg-gradient-to-r ${getCategoryColor(
             service.category
           )} transition-all duration-500 ${
             isHovered ? "h-1.5" : "h-1"
@@ -136,23 +137,24 @@ export const ServiceCard = ({
         />
 
         {/* Image Section */}
-        <div className="relative h-52 overflow-hidden">
+        <div className="relative h-48 sm:h-52 w-full flex-shrink-0 overflow-hidden">
           <Image
-            src={service.imageUrl}
+            src={service.imageUrl || "https://images.unsplash.com/photo-1581578731548-c64695cc6952"}
             alt={service.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className={`object-cover transition-transform duration-700 ${
               isHovered ? "scale-110" : "scale-100"
             }`}
           />
 
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
           {/* Category Badge - Top Left */}
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 z-10">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm border border-white/20 ${getCategoryBg(
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border border-white/20 shadow-sm ${getCategoryBg(
                 service.category
               )}`}
             >
@@ -163,8 +165,8 @@ export const ServiceCard = ({
 
           {/* Featured Badge - Top Right */}
           {service.isFeatured && (
-            <div className="absolute top-4 right-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-lg shadow-orange-500/30">
+            <div className="absolute top-4 right-4 z-10">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-lg shadow-orange-500/30">
                 <FaShieldAlt className="text-[10px]" />
                 Featured
               </span>
@@ -173,7 +175,7 @@ export const ServiceCard = ({
 
           {/* Action Buttons - Top Right Below Featured */}
           <div
-            className={`absolute top-16 right-4 flex flex-col gap-1.5 transition-all duration-300 ${
+            className={`absolute top-16 right-4 z-10 flex flex-col gap-1.5 transition-all duration-300 ${
               isHovered
                 ? "opacity-100 translate-x-0"
                 : "opacity-0 translate-x-2"
@@ -181,11 +183,11 @@ export const ServiceCard = ({
           >
             <button
               onClick={handleLike}
-              className="w-8 h-8 cursor-pointer rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all duration-300 shadow-lg"
+              className="w-8 h-8 cursor-pointer rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center hover:bg-white transition-all duration-300 shadow-md"
               aria-label="Like"
             >
               <FaHeart
-                className={`text-sm transition-all duration-300 ${
+                className={`text-xs transition-all duration-300 ${
                   isLiked
                     ? "text-red-500 scale-110"
                     : "text-gray-500 hover:text-red-400"
@@ -194,11 +196,11 @@ export const ServiceCard = ({
             </button>
             <button
               onClick={handleShare}
-              className="w-8 h-8 cursor-pointer rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-all duration-300 shadow-lg"
+              className="w-8 h-8 cursor-pointer rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center hover:bg-white transition-all duration-300 shadow-md"
               aria-label="Share"
             >
               <FaShare
-                className={`text-sm transition-all duration-300 ${
+                className={`text-xs transition-all duration-300 ${
                   isShared
                     ? "text-green-500 scale-110"
                     : "text-gray-500 hover:text-green-500"
@@ -207,133 +209,130 @@ export const ServiceCard = ({
             </button>
           </div>
 
-          {/* Rating Badge - Bottom Left */}
-          <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
-            <FaStar className="text-yellow-400 text-xs" />
-            <span className="text-white text-sm font-semibold">
-              {service.avgRating}
-            </span>
-            <span className="text-white/50 text-xs">
-              ({service.totalReviews})
-            </span>
-            <span className="w-px h-4 bg-white/20" />
-            <div className="flex items-center gap-1 text-white/70 text-xs">
-              <FaUsers className="text-[10px]" />
-              <span>{service.totalBookings}</span>
-            </div>
-          </div>
-
           {/* Price Tag - Bottom Right */}
-          <div className="absolute bottom-4 right-4">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-full px-4 py-1.5 shadow-lg shadow-green-500/30">
-              <span className="text-white font-bold text-lg">
+          <div className="absolute bottom-3 right-3 z-10">
+            <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-full px-3.5 py-1 shadow-lg shadow-green-600/30">
+              <span className="text-white font-bold text-base">
                 ${service.price}
               </span>
               {service.priceUnit === "hourly" && (
-                <span className="text-white/80 text-xs ml-0.5">/hr</span>
+                <span className="text-white/80 text-[10px] ml-0.5">/hr</span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="p-5">
-          {/* Title & Duration */}
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-1 flex-1">
-              {service.title}
-            </h3>
-            <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap ml-2">
-              <FaClock className="text-green-500 text-[10px]" />
-              {service.duration}
-            </span>
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {service.shortDescription}
-          </p>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {service.tags.map((tag, idx) => (
-              <span
-                key={idx}
-                className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full"
+        {/* Content Section - Flex grow to ensure balanced card heights */}
+        <div className="p-5 flex-1 flex flex-col justify-between bg-white">
+          <div>
+            {/* Title & Duration */}
+            <div className="flex items-start justify-between mb-2 gap-2 h-7">
+              <h3
+                className="text-base font-bold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-1 flex-1"
+                title={service.title}
               >
-                {tag}
+                {service.title}
+              </h3>
+              <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100 flex-shrink-0">
+                <FaClock className="text-green-500 text-[10px]" />
+                {service.duration}
               </span>
-            ))}
-          </div>
+            </div>
 
-          {/* What's Included - Progress Style */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
-              <span className="font-medium">Included</span>
-              <span>{service.whatsIncluded.length} items</span>
-            </div>
-            <div className="flex gap-1">
-              {service.whatsIncluded.slice(0, 4).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="flex-1 h-1 rounded-full bg-gray-200 overflow-hidden"
-                >
-                  <div className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full" />
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-1 mt-1.5">
-              {service.whatsIncluded.slice(0, 2).map((item, idx) => (
-                <span
-                  key={idx}
-                  className="text-[10px] text-gray-500 flex items-center gap-0.5"
-                >
-                  <FaCheckCircle className="text-green-500 text-[8px]" />
-                  {item}
-                </span>
-              ))}
-              {service.whatsIncluded.length > 2 && (
-                <span className="text-[10px] text-gray-400">
-                  +{service.whatsIncluded.length - 2} more
-                </span>
+            {/* Description - Fixed 2-line height */}
+            <p
+              className="text-xs text-gray-600 mb-3 line-clamp-2 h-9 overflow-hidden leading-relaxed"
+              title={service.shortDescription}
+            >
+              {service.shortDescription}
+            </p>
+
+            {/* Tags - Fixed container height with overflow hidden */}
+            <div className="flex flex-wrap gap-1.5 mb-3 h-10 overflow-hidden content-start">
+              {service.tags && service.tags.length > 0 ? (
+                service.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="text-[10px] font-medium bg-gray-100/80 text-gray-600 px-2.5 py-0.5 rounded-full border border-gray-200/50"
+                  >
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[10px] text-gray-400 italic">No tags</span>
               )}
             </div>
+
+            {/* What's Included Card Box */}
+            <div className="mb-4 h-[68px] flex flex-col justify-between bg-gray-50/80 p-2.5 rounded-xl border border-gray-100">
+              <div className="flex items-center justify-between text-[10px] text-gray-500">
+                <span className="font-semibold text-gray-700">Included</span>
+                <span className="font-medium text-gray-500">
+                  {service.whatsIncluded ? service.whatsIncluded.length : 0} items
+                </span>
+              </div>
+              <div className="flex gap-1 my-1">
+                {(service.whatsIncluded || []).slice(0, 4).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="flex-1 h-1 rounded-full bg-gray-200 overflow-hidden"
+                  >
+                    <div className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 overflow-hidden h-4 text-[10px] text-gray-600">
+                {(service.whatsIncluded || []).slice(0, 2).map((item, idx) => (
+                  <span
+                    key={idx}
+                    className="flex items-center gap-1 truncate max-w-[110px]"
+                  >
+                    <FaCheckCircle className="text-green-500 text-[8px] flex-shrink-0" />
+                    <span className="truncate">{item}</span>
+                  </span>
+                ))}
+                {(service.whatsIncluded || []).length > 2 && (
+                  <span className="text-gray-400 flex-shrink-0 text-[9px] ml-auto">
+                    +{(service.whatsIncluded || []).length - 2} more
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Bottom Actions */}
-          <div className="flex items-center gap-3 pt-3 border-t border-gray-100">
-            <Link
-              href={`/services/${service._id}`}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-sm font-medium rounded-xl transition-all duration-300 shadow-md shadow-green-500/30 hover:shadow-green-500/50 hover:scale-[1.02]"
-            >
-              <FaCalendarCheck className="text-sm" />
-              Book Now
-              <FaArrowRight className="group-hover:translate-x-1 transition-transform text-xs" />
-            </Link>
-            <Link
-              href={`/services/${service._id}`}
-              className="w-11 h-11 rounded-xl border-2 border-gray-200 hover:border-green-200 flex items-center justify-center text-gray-400 hover:text-green-500 transition-all duration-300 hover:bg-green-50 hover:scale-105"
-              aria-label="View details"
-            >
-              <FaEye className="text-sm" />
-            </Link>
-          </div>
+          {/* Bottom Action Footer - Anchored at the bottom of the card */}
+          <div className="mt-auto pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-2.5">
+              <Link
+                href={`/services/${serviceId}`}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-semibold rounded-xl transition-all duration-300 shadow-md shadow-green-600/20 hover:shadow-green-600/40 hover:scale-[1.01]"
+              >
+                <FaCalendarCheck className="text-xs" />
+                Book Now
+                <FaArrowRight className="group-hover:translate-x-1 transition-transform text-[10px]" />
+              </Link>
+              <Link
+                href={`/services/${serviceId}`}
+                className="w-10 h-10 rounded-xl border border-gray-200 hover:border-green-300 flex items-center justify-center text-gray-500 hover:text-green-600 transition-all duration-300 hover:bg-green-50/50 flex-shrink-0"
+                aria-label="View details"
+              >
+                <FaEye className="text-xs" />
+              </Link>
+            </div>
 
-          {/* Available Cities */}
-          <div className="flex items-center gap-1.5 mt-3 text-[10px] text-gray-400">
-            <FaMapMarkerAlt className="text-green-400 text-[10px]" />
-            <span>
-              Available in:{" "}
-              {service.availableCities.slice(0, 3).join(", ")}
-              {service.availableCities.length > 3 && " + more"}
-            </span>
+            {/* Available Cities */}
+            <div className="flex items-center gap-1.5 mt-2.5 text-[10px] text-gray-400 truncate">
+              <FaMapMarkerAlt className="text-green-500 text-[10px] flex-shrink-0" />
+              <span className="truncate">
+                Available in:{" "}
+                {service.availableCities && service.availableCities.length > 0
+                  ? service.availableCities.slice(0, 3).join(", ")
+                  : "Multiple Cities"}
+                {service.availableCities && service.availableCities.length > 3 && " + more"}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Decorative Card Number */}
-      <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 shadow-md">
-        {String(index + 1).padStart(2, "0")}
       </div>
     </div>
   );

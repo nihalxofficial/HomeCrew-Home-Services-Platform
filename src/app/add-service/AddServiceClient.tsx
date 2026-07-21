@@ -64,7 +64,7 @@ function Chip({ label, color, onRemove }: { label: string; color: "green" | "blu
 
 /* ──────────────────────────── Main Component ──────────────────────────── */
 export interface CreatorProps{
-  creator: User,
+  creator: User | null,
 }
 
 export default function AddServicePage({creator} : CreatorProps) {
@@ -122,6 +122,7 @@ export default function AddServicePage({creator} : CreatorProps) {
     const result = await addService(finalData);
     if(result.title){
       setIsSuccess(true);
+      router.push("/my-services");
     }
     if(result.success===false){
       toast.error("Service couldn't added!")

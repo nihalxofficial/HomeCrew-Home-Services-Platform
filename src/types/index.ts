@@ -1,4 +1,6 @@
 export interface Service {
+  _id?: string;
+  id?: string;
   title: string;
   category: string;
   shortDescription: string;
@@ -11,7 +13,12 @@ export interface Service {
   tags: string[];
   isFeatured: boolean;
   availableCities: string[];
-  creatorId: string;
+  creatorId?: string;
+  totalBookings?: number;
+  avgRating?: number;
+  totalReviews?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 
@@ -19,7 +26,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  image?: string;
+  image?: string | null;
   role: string;
   plan: string;
   status: string;

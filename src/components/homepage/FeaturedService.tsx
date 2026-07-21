@@ -255,12 +255,12 @@ const FeaturedServices = () => {
             : // Actual Cards
               featuredServices.map((service, index) => (
                 <ServiceCard
-                  key={service._id}
+                  key={service._id || service.id || index}
                   service={service}
                   index={index}
                   isVisible={isVisible}
                   onLike={handleLike}
-                  isLiked={likedCards.has(service._id)}
+                  isLiked={likedCards.has(service._id || service.id || "")}
                 />
               ))}
         </div>
