@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { BookingModal } from "./BookingModal";
 import {
   FaStar,
   FaClock,
@@ -303,14 +304,7 @@ export const ServiceCard = ({
           {/* Bottom Action Footer - Anchored at the bottom of the card */}
           <div className="mt-auto pt-3 border-t border-gray-100">
             <div className="flex items-center gap-2.5">
-              <Link
-                href={`/services/${serviceId}`}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-semibold rounded-xl transition-all duration-300 shadow-md shadow-green-600/20 hover:shadow-green-600/40 hover:scale-[1.01]"
-              >
-                <FaCalendarCheck className="text-xs" />
-                Book Now
-                <FaArrowRight className="group-hover:translate-x-1 transition-transform text-[10px]" />
-              </Link>
+              <BookingModal serviceTitle={service.title} />
               <Link
                 href={`/services/${serviceId}`}
                 className="w-10 h-10 rounded-xl border border-gray-200 hover:border-green-300 flex items-center justify-center text-gray-500 hover:text-green-600 transition-all duration-300 hover:bg-green-50/50 flex-shrink-0"

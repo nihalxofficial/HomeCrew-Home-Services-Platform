@@ -11,8 +11,16 @@ const handleResponse = async (res: Response) => {
   if (res.status === 401) redirect("/login");
   if (res.status === 403) redirect("/forbidden");
 
-  const data = await res.json();
-  return data;
+  if (!res.ok) {
+    return null;
+  }
+
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await res.json();
+  }
+
+  return null;
 };
 
 export const serverFetch = async (path: string, requireAuth: boolean = false) => {

@@ -24,3 +24,7 @@ export const getAllServices = async (params?: GetServicesParams) => {
   const path = queryString ? `/services?${queryString}` : `/services`;
   return serverFetch(path);
 }
+
+export const getServiceById = async(id: string)=>{
+  return serverFetch(`/services/${id}`);
+}
