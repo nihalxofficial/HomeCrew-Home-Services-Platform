@@ -87,7 +87,6 @@ export const ServiceCardSkeleton = () => {
       </div>
 
       {/* Decorative Card Number */}
-      <div className="absolute -top-3 -right-3 w-8 h-8 bg-gray-200 rounded-full" />
     </div>
   );
 };
