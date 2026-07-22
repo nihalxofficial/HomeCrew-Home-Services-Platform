@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import { ToastContainer } from "react-toastify";
+import Chatbot from "@/components/shared/Chatbot";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -27,6 +28,7 @@ export default function RootLayout({
         {children}
         <ToastContainer autoClose={2000} />
         <Footer />
+        <Chatbot/>
       </body>
     </html>
   );
