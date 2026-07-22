@@ -28,3 +28,7 @@ export const getAllServices = async (params?: GetServicesParams) => {
 export const getServiceById = async(id: string)=>{
   return serverFetch(`/services/${id}`);
 }
+
+export const getServicesByCreator = async(id: string)=>{
+  return serverFetch(`/services?creatorId=${id}`)
+}
