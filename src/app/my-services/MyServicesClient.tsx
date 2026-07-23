@@ -233,21 +233,21 @@ const MyServicesClient = ({ services, userId }: MyServicesClientProps) => {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => handleView(service._id)}
+                            onClick={() => service._id && handleView(service._id)}
                             className="p-2 cursor-pointer text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
                             title="View"
                           >
                             <FaEye className="text-sm" />
                           </button>
                           <button
-                            onClick={() => handleEdit(service._id)}
+                            onClick={() => service._id && handleEdit(service._id)}
                             className="p-2 cursor-pointer text-gray-400 hover:text-green-600 transition-colors rounded-lg hover:bg-green-50"
                             title="Edit"
                           >
                             <FaEdit className="text-sm" />
                           </button>
                           <button
-                            onClick={() => handleDelete(service._id)}
+                            onClick={() => service._id && handleDelete(service._id)}
                             disabled={isDeleting === service._id}
                             className="p-2 text-gray-400 cursor-pointer hover:text-red-600 transition-colors rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Delete"
