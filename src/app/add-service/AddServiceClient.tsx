@@ -17,9 +17,10 @@ import {
   FaImage, FaClock, FaDollarSign, FaBroom, FaWrench, FaHammer,
   FaBug, FaUserGraduate, FaScrewdriver, FaBolt, FaTv, FaSeedling,
   FaSpinner, FaInfoCircle, FaList, FaEye,
+  FaMagic, // NEW: icon for the "Generate with AI" button
 } from "react-icons/fa";
 import { User } from "@/types";
-import { addService } from "@/lib/action/services";
+import { addService, generateServiceListing } from "@/lib/action/services";
 import { toast } from "react-toastify";
 
 /* ──────────────────────────── Constants ──────────────────────────── */
@@ -62,6 +63,45 @@ function Chip({ label, color, onRemove }: { label: string; color: "green" | "blu
   );
 }
 
+// NEW: reusable "Generate with AI" box — dropped into every step that has
+// manual fields (0, 1, 2). Calls the same handleGenerate passed down from
+// the parent so all steps share one generation flow.
+function AiGenerateBox({
+  aiIdea, onIdeaChange, onGenerate, generating,
+}: {
+  aiIdea: string;
+  onIdeaChange: (v: string) => void;
+  onGenerate: () => void;
+  generating: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-4 mb-2">
+      <label className="flex items-center gap-2 text-sm font-semibold text-purple-700 mb-2">
+        <FaMagic /> Generate with AI
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={aiIdea}
+          onChange={(e) => onIdeaChange(e.target.value)}
+          placeholder="e.g., fixing leaky kitchen pipes"
+          className="flex-1 px-4 py-2.5 rounded-xl border border-purple-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 transition-all"
+        />
+        <button
+          type="button"
+          onClick={onGenerate}
+          disabled={generating || !aiIdea.trim()}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-purple-700 text-white rounded-xl font-semibold text-sm cursor-pointer hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {generating ? <FaSpinner className="animate-spin" /> : <FaMagic />}
+          {generating ? "Generating…" : "Generate"}
+        </button>
+      </div>
+      <p className="text-xs text-purple-500 mt-1.5">Fills in the fields below — review and edit before continuing.</p>
+    </div>
+  );
+}
+
 /* ──────────────────────────── Main Component ──────────────────────────── */
 export interface CreatorProps{
   creator: User | null,
@@ -86,6 +126,10 @@ export default function AddServicePage({creator} : CreatorProps) {
   const [newTag, setNewTag]           = useState("");
   const [newCity, setNewCity]         = useState("");
 
+  // NEW: AI "Generate listing" state — shared across steps 0, 1, 2
+  const [aiIdea, setAiIdea]           = useState("");
+  const [generating, setGenerating]   = useState(false);
+
   /* ── Step progression ── */
 
   const goNext = (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,6 +144,34 @@ export default function AddServicePage({creator} : CreatorProps) {
   const goPrev = () => {
     setStep((s) => s - 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // NEW: calls the Groq-powered /api/services/generate endpoint and pre-fills
+  // stepData + tags with the result, regardless of which step triggered it.
+  const handleGenerate = async () => {
+    if (!aiIdea.trim()) return;
+    setGenerating(true);
+    try {
+      const result = await generateServiceListing(aiIdea);
+      setStepData((prev) => ({
+        ...prev,
+        title: result.title,
+        category: result.category,
+        shortDescription: result.shortDescription,
+        fullDescription: result.fullDescription,
+        price: String(result.price),
+        priceUnit: result.priceUnit,
+        duration: result.duration,
+      }));
+      setTags(result.tags ?? []);
+      setIncluded(result.whatsIncluded ?? []);
+      setCities(result.availableCities ?? []);
+      toast.success("Draft generated — review and edit before continuing.");
+    } catch (err) {
+      toast.error("AI generation failed. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   /* ── Final submit ── */
@@ -118,7 +190,6 @@ export default function AddServicePage({creator} : CreatorProps) {
     };
     setIsSubmitting(true);
     await new Promise((r) => setTimeout(r, 1500));
-    // console.log("Service Created:", finalData);
     const result = await addService(finalData);
     if(result.title){
       setIsSuccess(true);
@@ -214,9 +285,23 @@ export default function AddServicePage({creator} : CreatorProps) {
           {/* ══════════ STEP 0 — Basic Info ══════════ */}
           {step === 0 && (
             <Form onSubmit={goNext} className="space-y-5">
+              {/* NEW: AI generate box */}
+              <AiGenerateBox
+                aiIdea={aiIdea}
+                onIdeaChange={setAiIdea}
+                onGenerate={handleGenerate}
+                generating={generating}
+              />
+
               <TextField name="title" isRequired>
                 <Label className={LBL}>Service Title <span className="text-red-500">*</span></Label>
-                <Input className={FIELD} placeholder="e.g., Premium Home Deep Cleaning" defaultValue={stepData.title as string} />
+                {/* COMMENT: Changed from defaultValue to controlled value/onChange to allow AI pre-filling to update the input field */}
+                <Input
+                  className={FIELD}
+                  placeholder="e.g., Premium Home Deep Cleaning"
+                  value={(stepData.title as string) || ""}
+                  onChange={(e) => setStepData((p) => ({ ...p, title: e.target.value }))}
+                />
                 <FieldError className={ERR} />
               </TextField>
 
@@ -254,11 +339,12 @@ export default function AddServicePage({creator} : CreatorProps) {
                   <Label className="text-sm font-semibold text-gray-700">Short Description <span className="text-red-500">*</span></Label>
                   <span className="text-xs text-gray-400">{((stepData.shortDescription as string) || "").length}/100</span>
                 </div>
+                {/* COMMENT: Changed from defaultValue to controlled value to allow AI pre-filling to update the input field */}
                 <Input
                   className={FIELD}
                   placeholder="One-liner about the service (max 100 chars)"
                   maxLength={100}
-                  defaultValue={stepData.shortDescription as string}
+                  value={(stepData.shortDescription as string) || ""}
                   onChange={(e) => setStepData((p) => ({ ...p, shortDescription: e.target.value }))}
                 />
                 <FieldError className={ERR} />
@@ -266,7 +352,13 @@ export default function AddServicePage({creator} : CreatorProps) {
 
               <TextField name="fullDescription" isRequired>
                 <Label className={LBL}>Full Description <span className="text-red-500">*</span></Label>
-                <TextArea className={`${FIELD} min-h-[110px] resize-none`} placeholder="Detailed description of the service…" defaultValue={stepData.fullDescription as string} />
+                {/* COMMENT: Changed from defaultValue to controlled value/onChange to allow AI pre-filling to update the input field */}
+                <TextArea
+                  className={`${FIELD} min-h-[110px] resize-none`}
+                  placeholder="Detailed description of the service…"
+                  value={(stepData.fullDescription as string) || ""}
+                  onChange={(e) => setStepData((p) => ({ ...p, fullDescription: e.target.value }))}
+                />
                 <FieldError className={ERR} />
               </TextField>
 
@@ -277,12 +369,29 @@ export default function AddServicePage({creator} : CreatorProps) {
           {/* ══════════ STEP 1 — Pricing ══════════ */}
           {step === 1 && (
             <Form onSubmit={goNext} className="space-y-5">
+              {/* NEW: AI generate box */}
+              <AiGenerateBox
+                aiIdea={aiIdea}
+                onIdeaChange={setAiIdea}
+                onGenerate={handleGenerate}
+                generating={generating}
+              />
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <TextField name="price" isRequired>
                   <Label className={LBL}>Price ($) <span className="text-red-500">*</span></Label>
                   <div className="relative">
                     <FaDollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
-                    <Input type="number" className={`${FIELD} pl-9`} placeholder="0.00" min={0} step={0.01} defaultValue={stepData.price as string} />
+                    {/* COMMENT: Changed from defaultValue to controlled value/onChange to allow AI pre-filling to update the input field */}
+                    <Input
+                      type="number"
+                      className={`${FIELD} pl-9`}
+                      placeholder="0.00"
+                      min={0}
+                      step={0.01}
+                      value={(stepData.price as string) || ""}
+                      onChange={(e) => setStepData((p) => ({ ...p, price: e.target.value }))}
+                    />
                   </div>
                   <FieldError className={ERR} />
                 </TextField>
@@ -317,7 +426,13 @@ export default function AddServicePage({creator} : CreatorProps) {
                 <Label className={LBL}>Duration <span className="text-red-500">*</span></Label>
                 <div className="relative">
                   <FaClock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
-                  <Input className={`${FIELD} pl-9`} placeholder="e.g., 3-4 hours, 2-3 days" defaultValue={stepData.duration as string} />
+                  {/* COMMENT: Changed from defaultValue to controlled value/onChange to allow AI pre-filling to update the input field */}
+                  <Input
+                    className={`${FIELD} pl-9`}
+                    placeholder="e.g., 3-4 hours, 2-3 days"
+                    value={(stepData.duration as string) || ""}
+                    onChange={(e) => setStepData((p) => ({ ...p, duration: e.target.value }))}
+                  />
                 </div>
                 <FieldError className={ERR} />
               </TextField>
@@ -326,7 +441,13 @@ export default function AddServicePage({creator} : CreatorProps) {
                 <Label className={LBL}>Image URL</Label>
                 <div className="relative">
                   <FaImage className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
-                  <Input className={`${FIELD} pl-9`} placeholder="https://images.unsplash.com/…" defaultValue={stepData.imageUrl as string} />
+                  {/* COMMENT: Changed from defaultValue to controlled value/onChange to allow AI pre-filling to update the input field */}
+                  <Input
+                    className={`${FIELD} pl-9`}
+                    placeholder="https://images.unsplash.com/…"
+                    value={(stepData.imageUrl as string) || ""}
+                    onChange={(e) => setStepData((p) => ({ ...p, imageUrl: e.target.value }))}
+                  />
                 </div>
                 <FieldError className={ERR} />
               </TextField>
@@ -338,6 +459,14 @@ export default function AddServicePage({creator} : CreatorProps) {
           {/* ══════════ STEP 2 — Details ══════════ */}
           {step === 2 && (
             <Form onSubmit={goNext} className="space-y-6">
+              {/* NEW: AI generate box */}
+              <AiGenerateBox
+                aiIdea={aiIdea}
+                onIdeaChange={setAiIdea}
+                onGenerate={handleGenerate}
+                generating={generating}
+              />
+
               {/* What's Included */}
               <ListSection
                 label="What's Included"
@@ -411,7 +540,6 @@ export default function AddServicePage({creator} : CreatorProps) {
                   )}
                 </div>
               </div>
-
 
               {/* Nav + Submit */}
               <div className="flex items-center justify-between pt-2 border-t border-gray-100">
