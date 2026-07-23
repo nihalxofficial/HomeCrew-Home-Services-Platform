@@ -24,6 +24,7 @@
   - [Platforms Used](#platforms-used)
   - [Deployments](#deployments)
 - [Key Features](#-key-features)
+- [AI Integrations](#-ai-integrations)
 - [Tech Stack / npm Packages](#-npm-packages-used)
 - [Environment Variables](#-environment-variables)
 - [Getting Started](#-getting-started)
@@ -35,10 +36,11 @@
 
 HomeCrew is a booking platform for professional home services — cleaning, repairs, pest control, painting, tutoring, installation and more — built to connect customers with verified, background-checked pros in just a few clicks.
 
-The goal was to go beyond a simple "services listing" site and build something that feels like a real consumer marketplace: category-based browsing, real-time availability, an AI-assisted diagnosis flow for appliance issues, and a full content layer (blog, FAQ, testimonials) around the core booking experience.
+The goal was to go beyond a simple "services listing" site and build something that feels like a real consumer marketplace: category-based browsing, real-time availability, two distinct AI-powered flows (a conversational advisor for customers and a listing generator for pros), and a full content layer (blog, FAQ, testimonials) around the core booking experience.
 
 **What makes it different from a typical services-listing clone:**
-- **AI-assisted service matching** — a built-in AI advisor helps diagnose appliance problems and automatically matches customers with the right service listing, instead of leaving them to guess which category to search.
+- **Conversational AI advisor** — a chat-based assistant helps customers describe and diagnose a home/appliance problem through back-and-forth conversation, instead of a static search box.
+- **AI-generated service listings** — pros can type a rough one-line idea and get a complete draft listing (title, description, price, duration, tags) generated for them to review and edit, instead of filling out every field by hand.
 - **Category-first discovery** — services are organized into browsable categories (Cleaning, Repair & Maintenance, Pest Control, Electrical, Tutoring, Installation, and more), each with live service counts.
 - **Real-time availability & price comparison** — customers can compare pros by price, rating, and real-time availability before booking, rather than a static contact-request form.
 - **Trust-first booking flow** — verified/background-checked pros, a satisfaction guarantee, and "pay only after the service is completed" reduce booking friction.
@@ -50,7 +52,7 @@ The goal was to go beyond a simple "services listing" site and build something t
 ## 🎯 Project Overview
 
 ### Objective
-To design and build a complete home-services marketplace — from category browsing and AI-assisted service discovery, through comparing and booking a pro, to post-service payment — while practicing production-level concerns like authentication, role-based access, and a clean separation between a Next.js client and a dedicated backend server.
+To design and build a complete home-services marketplace — from category browsing and AI-assisted service discovery, through comparing and booking a pro, to post-service payment — while practicing production-level concerns like authentication, role-based access, multi-provider AI integration, and a clean separation between a Next.js client and a dedicated backend server.
 
 ### Target Audience
 - **Customers** looking to find, compare, and book vetted professionals for home services.
@@ -63,6 +65,7 @@ To design and build a complete home-services marketplace — from category brows
 - **Backend:** Node.js/Express server (see [server repository](https://github.com/nihalxofficial/HomeCrew-Server))
 - **Database:** MongoDB
 - **Auth:** better-auth (JWT-based)
+- **AI:** Google Gemini (conversational advisor) + Groq (listing generation)
 - **Hosting:** Vercel (client)
 
 ### Deployments
@@ -77,7 +80,8 @@ To design and build a complete home-services marketplace — from category brows
 
 > Only the features that set HomeCrew apart are listed here — standard auth/CRUD basics are covered later in the docs.
 
-- **AI Advisor** — an AI-powered assistant helps customers diagnose home/appliance problems and automatically surfaces matching service listings.
+- **AI Advisor Chatbot** — a conversational assistant that helps customers describe a home/appliance problem and surfaces matching service listings.
+- **AI Service Listing Generator** — pros type a rough idea and get a full draft listing generated for review before publishing.
 - **Category-based browsing** — services grouped into categories (Cleaning, Repair & Maintenance, Home Improvement, Pest Control, Tutoring, Installation, Electrical, TV Mounting, Gardening) with per-category service counts.
 - **Service search & comparison** — customers can search, filter, and compare pros by price, rating, and real-time availability.
 - **For Pros onboarding path** — a dedicated flow for professionals to join the platform and list their services.
@@ -85,6 +89,19 @@ To design and build a complete home-services marketplace — from category brows
 - **Blog / content hub** — categorized articles (maintenance tips, guides) tied to service categories.
 - **FAQ & support center** — structured FAQ plus live chat, email, and 24/7 support entry points.
 - **Newsletter subscription** — capture flow for exclusive offers and early access to new services.
+
+---
+
+## 🤖 AI Integrations
+
+HomeCrew uses two separate AI providers, each matched to the shape of the task rather than a one-size-fits-all model:
+
+| Feature | Provider | Model | Why this provider |
+|---|---|---|---|
+| **AI Advisor Chatbot** — multi-turn conversation with customers to diagnose their problem | Google Gemini | `gemini-flash-latest` | Native multi-turn chat session handling, well suited to back-and-forth conversation |
+| **AI Service Listing Generator** — single-shot draft generation for pros adding a new service | Groq | `openai/gpt-oss-120b` | Very fast single-shot inference, ideal for structured JSON output with no conversation state needed |
+
+Both AI calls are made **server-side only** (Express), never from the Next.js client directly — the client just calls HomeCrew's own `/api/chat` and `/api/services/generate` endpoints, keeping both provider API keys off the browser entirely.
 
 ---
 
@@ -100,6 +117,8 @@ To design and build a complete home-services marketplace — from category brows
 | `better-auth` | Authentication (JWT-based) |
 | `react-icons` | Icon library |
 | `react-toast` | Toast notifications |
+
+> AI SDKs (`@google/generative-ai`, `groq-sdk`) live in the [server repository](https://github.com/nihalxofficial/HomeCrew-Server), not here — the client never talks to Gemini or Groq directly.
 
 ---
 
@@ -122,6 +141,8 @@ MONGO_URI=your_mongodb_connection_string
 > Never commit `.env.local` to version control.
 >
 > ⚠️ `NEXT_PUBLIC_*` variables are baked into the JavaScript bundle at **build time**. If you change one, rebuild the app rather than just restarting it.
+>
+> Gemini/Groq API keys are configured on the server side only — see the [server README](https://github.com/nihalxofficial/HomeCrew-Server) for those variables.
 
 ---
 
